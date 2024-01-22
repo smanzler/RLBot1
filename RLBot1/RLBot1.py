@@ -23,7 +23,7 @@ options = Options()
 user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.2 (KHTML, like Gecko) Chrome/22.0.1216.0 Safari/537.2'
 options.add_argument(f'user-agent={user_agent}')
 options.add_argument("--start-maximized")
-#options.add_argument("--headless=new")
+options.add_argument("--headless=new")
 driver = webdriver.Chrome(service=service, options=options)
 soup = BeautifulSoup()
 URL = 'https://api.tracker.gg/api/v2/rocket-league/standard/profile'
@@ -43,33 +43,36 @@ def get_mmr(data):
 def get_info(platform, ID):
     playlistData = {}
     response = driver.get(f'{URL}/{platform}/{ID}') # going to return NoneType
-    html = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/pre"))).get_attribute("innerHTML")
-    data = json.loads(html)
-    # error handling
-    if list(data.keys())[0] == "errors":
-        return("Error in returning rank")
-    # playlistCount gets iterated by 1 then condition is >= 1 so it ignores lifetime
-    # condition for 1 is for unranked
-    # anything else is ranked playlists
-    playlistCount = 0
+    try:
+        html = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/pre"))).get_attribute("innerHTML")
+        data = json.loads(html)
+        # error handling
+        if list(data.keys())[0] == "errors":
+            return("Error in returning rank")
+        # playlistCount gets iterated by 1 then condition is >= 1 so it ignores lifetime
+        # condition for 1 is for unranked
+        # anything else is ranked playlists
+        playlistCount = 0
 
-    for data in data["data"]["segments"]:
-        if playlistCount == 1:
-            unrankedName = data["metadata"]["name"]  # Gives playlist name -> Unranked
-            unrankedMMR = data["stats"]["rating"]["value"]
-            playlistData[unrankedName] = unrankedMMR
-        elif playlistCount > 1:
-            currentRankedPlaylist = []
-            playlistName = get_playlist(data)
-            rankName = get_rank(data)
-            divisionName = get_division(data)
-            MMR = get_mmr(data)
-            currentRankedPlaylist.append(rankName)
-            currentRankedPlaylist.append(divisionName)
-            currentRankedPlaylist.append(MMR)
-            playlistData[playlistName] = currentRankedPlaylist
-        playlistCount += 1
-    return playlistData
+        for data in data["data"]["segments"]:
+            if playlistCount == 1:
+                unrankedName = data["metadata"]["name"]  # Gives playlist name -> Unranked
+                unrankedMMR = data["stats"]["rating"]["value"]
+                playlistData[unrankedName] = unrankedMMR
+            elif playlistCount > 1:
+                currentRankedPlaylist = []
+                playlistName = get_playlist(data)
+                rankName = get_rank(data)
+                divisionName = get_division(data)
+                MMR = get_mmr(data)
+                currentRankedPlaylist.append(rankName)
+                currentRankedPlaylist.append(divisionName)
+                currentRankedPlaylist.append(MMR)
+                playlistData[playlistName] = currentRankedPlaylist
+            playlistCount += 1
+        return playlistData
+    except:
+        return('Bro it didnt work')
 
 @client.event
 async def on_ready():
