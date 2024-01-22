@@ -1,6 +1,7 @@
 import discord
 import os
 import json
+from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -17,7 +18,7 @@ XBox: /xbl/<username>
 '''
 
 client = discord.Client()
-service = Service("C:\\Users\\simon.manzler\\Downloads\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe")
+service = Service(Path(__file__).with_name("chromedriver.exe"))
 options = Options()
 user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.2 (KHTML, like Gecko) Chrome/22.0.1216.0 Safari/537.2'
 options.add_argument(f'user-agent={user_agent}')
