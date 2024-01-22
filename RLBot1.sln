@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "RLBot1", "RLBot1\RLBot1.pyproj", "{6762B65D-C9E1-47FF-82BC-9646A4745398}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6762B65D-C9E1-47FF-82BC-9646A4745398}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6762B65D-C9E1-47FF-82BC-9646A4745398}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AECCF382-2FFB-4077-9BFE-E357C31EDF8E}
+	EndGlobalSection
+EndGlobal
