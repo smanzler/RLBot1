@@ -44,47 +44,51 @@ def get_division(data):
 def get_mmr(data):
     return data["stats"]["rating"]["value"]  # Gives MMR value
 
-def get_pic():
-    # creating a image object (new image object) with
-    # RGB mode and size 400x400
-    data = getjson()
-    im = Image.new(mode="RGB", size=(300, 900),color=(58,59,60))
+def get_api(platform, ID):
+    response = driver.get(f'{URL}/{platform}/{ID}') # going to return NoneType
+    try:
+        html = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/pre"))).get_attribute("innerHTML")
+        return json.loads(html)
+    except:
+        return getjson()    
 
-    # Call draw Method to add 2D graphics in an image
-    I1 = ImageDraw.Draw(im)
+def get_pic():
+    # data = get_api(platform=platform, ID=ID)
+    data = getjson()
+    im = Image.new(mode="RGB", size=(300, 900),color=(58,59,60)) #creates the base
+
+    I1 = ImageDraw.Draw(im) # allows text to be added
  
-    # Custom font style and font size
-    myFont = ImageFont.truetype('Roboto-Black.ttf', 11)
+    myFont = ImageFont.truetype('Roboto-Black.ttf', 11) #different font sizes
     myFont2 = ImageFont.truetype('Roboto-Black.ttf', 17)
     myFont3 = ImageFont.truetype('Roboto-Black.ttf', 8)
-    count = 10
+    
+    count = 10 #x value the loop starts creating pics
     
     for data in data["data"]["segments"][1:9]:
-        im2 = Image.open(r"icons\{}.webp".format(get_rank(data)))
+        im2 = Image.open(r"icons\{}.webp".format(get_rank(data))) #gets icon
         im2 = im2.resize((100,100))
-        im.paste(im2, (10, count), mask = im2)
-        I1.text((120, count+30), get_playlist(data), font=myFont, fill = (255, 255, 255),)
+        im.paste(im2, (10, count), mask = im2) #adds icon
+        I1.text((120, count+30), get_playlist(data), font=myFont, fill = (255, 255, 255),) #adds text
         I1.text((120, count+40), str(get_mmr(data)), font=myFont2, fill = (139, 128, 0),)
         I1.text((120, count+57), get_rank(data) + " " + get_division(data), font=myFont3, fill = (255, 255, 255),)
-        count+=110
+        count+=110 #moves down
 
-    # This method will show image in any image viewer
-    im.show()
+    im.show() #shows the image (optional)
     return im
 
 def get_info(platform, ID):
-    playlistData = ""
-    # response = driver.get(f'{URL}/{platform}/{ID}') # going to return NoneType
-    # try:
-    #     html = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/pre"))).get_attribute("innerHTML")
-    #     data = json.loads(html)
-    # except:
+    # data = get_api(platform=platform, ID=ID)
     data = getjson()
+    
     # error handling
     if list(data.keys())[0] == "errors":
         return("Error in returning rank")
+    
+    playlistData = ""
+    
     # returns iterations 1-8 of the segments
-    for data in data["data"]["segments"][1:8]:
+    for data in data["data"]["segments"][1:9]:
         playlistData +="{}: ({}) {} {}\n".format(get_playlist(data), get_mmr(data), get_rank(data), get_division(data))
     return playlistData.format()
 
@@ -110,6 +114,7 @@ async def on_message(message):
         playlistData = get_info(platform, ID)
         print(playlistData)
         await message.channel.send(playlistData)  #this line sends message back to channel in discord
+        # this block sends the pic (not sure how it works)
         with BytesIO() as image_binary:
             get_pic().save(image_binary, 'PNG')
             image_binary.seek(0)
