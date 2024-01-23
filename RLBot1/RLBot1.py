@@ -1,6 +1,8 @@
+from shlex import join
 import discord
 import os
 import json
+from dictparse import getjson
 from pathlib import Path
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -41,38 +43,24 @@ def get_mmr(data):
     return data["stats"]["rating"]["value"]  # Gives MMR value
 
 def get_info(platform, ID):
-    playlistData = {}
+    playlistData = ""
     response = driver.get(f'{URL}/{platform}/{ID}') # going to return NoneType
     try:
         html = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.XPATH, "/html/body/pre"))).get_attribute("innerHTML")
         data = json.loads(html)
-        # error handling
-        if list(data.keys())[0] == "errors":
-            return("Error in returning rank")
-        # playlistCount gets iterated by 1 then condition is >= 1 so it ignores lifetime
-        # condition for 1 is for unranked
-        # anything else is ranked playlists
-        playlistCount = 0
-
-        for data in data["data"]["segments"]:
-            if playlistCount == 1:
-                unrankedName = data["metadata"]["name"]  # Gives playlist name -> Unranked
-                unrankedMMR = data["stats"]["rating"]["value"]
-                playlistData[unrankedName] = unrankedMMR
-            elif playlistCount > 1:
-                currentRankedPlaylist = []
-                playlistName = get_playlist(data)
-                rankName = get_rank(data)
-                divisionName = get_division(data)
-                MMR = get_mmr(data)
-                currentRankedPlaylist.append(rankName)
-                currentRankedPlaylist.append(divisionName)
-                currentRankedPlaylist.append(MMR)
-                playlistData[playlistName] = currentRankedPlaylist
-            playlistCount += 1
-        return playlistData
     except:
-        return('Bro it didnt work')
+        data = getjson()
+    # error handling
+    if list(data.keys())[0] == "errors":
+        return("Error in returning rank")
+    # playlistCount gets iterated by 1 then condition is >= 1 so it ignores lifetime
+    # condition for 1 is for unranked
+    # anything else is ranked playlists
+    for data in data["data"]["segments"][1:8]:
+        str1 = "{}: ({}) {} {}\n".format(data['metadata']['name'], data['stats']['rating']['value'], data['stats']['tier']['metadata']['name'], data['stats']['division']['metadata']['name'])
+        playlistData += str1
+        print(playlistData)
+    return playlistData.format()
 
 @client.event
 async def on_ready():
