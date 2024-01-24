@@ -52,9 +52,9 @@ def get_api(platform, ID):
     except:
         return getjson()    
 
-def get_pic():
-    # data = get_api(platform=platform, ID=ID)
-    data = getjson()
+def get_pic(platform, ID):
+    data = get_api(platform=platform, ID=ID)
+    #data = getjson()
     im = Image.new(mode="RGB", size=(300, 900),color=(58,59,60)) #creates the base
 
     I1 = ImageDraw.Draw(im) # allows text to be added
@@ -66,7 +66,7 @@ def get_pic():
     count = 10 #x value the loop starts creating pics
     
     for data in data["data"]["segments"][1:9]:
-        im2 = Image.open(r"icons\{}.webp".format(get_rank(data))) #gets icon
+        im2 = Image.open(r"icons\{}.webp".format(get_rank(data))).convert("RGBA") #gets icon
         im2 = im2.resize((100,100))
         im.paste(im2, (10, count), mask = im2) #adds icon
         I1.text((120, count+30), get_playlist(data), font=myFont, fill = (255, 255, 255),) #adds text
@@ -113,10 +113,10 @@ async def on_message(message):
         ID = words[2]
         playlistData = get_info(platform, ID)
         print(playlistData)
-        await message.channel.send(playlistData)  #this line sends message back to channel in discord
+        #await message.channel.send(playlistData)  #this line sends message back to channel in discord
         # this block sends the pic (not sure how it works)
         with BytesIO() as image_binary:
-            get_pic().save(image_binary, 'PNG')
+            get_pic(platform, ID).save(image_binary, 'PNG')
             image_binary.seek(0)
             await message.channel.send(file=discord.File(fp=image_binary, filename='image.png'))
 
