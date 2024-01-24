@@ -1,6 +1,7 @@
 from shlex import join
 import discord
 import os
+import PIL
 from io import BytesIO
 import json
 from dictparse import getjson
@@ -51,34 +52,152 @@ def get_api(platform, ID):
         return json.loads(html)
     except:
         return getjson()    
+    
+def rank_number(rank):
+    if rank == "Supersonic Legend":
+        return 230
+    elif rank == "Grand Champion III":
+        return 220
+    elif rank == "Grand Champion II":
+        return 210
+    elif rank == "Grand Champion I":
+        return 200
+    elif rank == "Champion III":
+        return 190
+    elif rank == "Champion II":
+        return 180
+    elif rank == "Champion I":
+        return 170
+    elif rank == "Diamond III":
+        return 160
+    elif rank == "Diamond II":
+        return 150
+    elif rank == "Diamond I":
+        return 140
+    elif rank == "Platinum III":
+        return 13
+    elif rank == "Platinum II":
+        return 120
+    elif rank == "Platinum I":
+        return 110
+    elif rank == "Gold III":
+        return 100
+    elif rank == "Gold II":
+        return 90
+    elif rank == "Gold I":
+        return 80
+    elif rank == "Silver III":
+        return 70
+    elif rank == "Silver II":
+        return 60
+    elif rank == "Silver I":
+        return 50
+    elif rank == "Bronze III":
+        return 40
+    elif rank == "Bronze II":
+        return 30
+    elif rank == "Bronze I":
+        return 20
+    elif rank == "Unranked":
+        return 10
+    else:
+        return 0
+    
+def rank_num_with_division(rank, division):
+    new_rank_num = rank_number(rank)
+    if division == "Division I":
+        return new_rank_num+1
+    elif division == "Division II":
+        return new_rank_num+2
+    elif division == "Division III":
+        return new_rank_num+3
+    else:
+        return new_rank_num
+    
+def get_highest_rank(data):
+    highest_rank = 0
+    for each in data["data"]["segments"][1:9]:
+        num = rank_num_with_division(rank=get_rank(each), division=get_division(each))
+        if (highest_rank < num):
+            highest_rank = num
+    return highest_rank
+
+def get_location(ID):
+    if ID == 0:
+        return 100, 10
+    elif ID == 1:
+        return 200, 10
+    elif ID == 2:
+        return 300, 10
+    elif ID == 3:
+        return 300, 320
+    elif ID == 4:
+        return 300, 630
+    elif ID == 5:
+        return 400, 10
+    elif ID == 6:
+        return 400, 320
+    elif ID == 7:
+        return 400, 630
+    elif ID == 8:
+        return 500, 10
+    else:
+        return 0,0
 
 def get_pic(platform, ID):
-    data = get_api(platform=platform, ID=ID)
-    #data = getjson()
-    im = Image.new(mode="RGB", size=(300, 900),color=(58,59,60)) #creates the base
+    #data = get_api(platform=platform, ID=ID)
+    data = getjson()
+    im = Image.new(mode="RGB", size=(960, 540),color=(58,59,60)) #creates the base
 
     I1 = ImageDraw.Draw(im) # allows text to be added
- 
-    myFont = ImageFont.truetype('Roboto-Black.ttf', 11) #different font sizes
-    myFont2 = ImageFont.truetype('Roboto-Black.ttf', 17)
-    myFont3 = ImageFont.truetype('Roboto-Black.ttf', 8)
+
+    myFont = ImageFont.truetype('Roboto-Black.ttf', 19) #different font sizes
+    myFont2 = ImageFont.truetype('Roboto-Black.ttf', 25)
+    myFont3 = ImageFont.truetype('Roboto-Black.ttf', 15)
+
+    myFont5 = ImageFont.truetype('Roboto-Black.ttf', 40)
+    myFont6 = ImageFont.truetype('Roboto-Black.ttf', 30)
+
+    myFont8 = ImageFont.truetype('Roboto-Black.ttf', 50)
     
-    count = 10 #x value the loop starts creating pics
+    down_count = 10 #x value the loop starts creating pics
+    across_count = 10
+    count = 0
+
+    highest_rank = get_highest_rank(data)
+    first = 1
+
+    I1.text((30, 30), (data["data"]["platformInfo"]["platformSlug"]).capitalize(), font=myFont, fill = (255, 255, 255)) #adds text
+    I1.text((30, 50), data["data"]["platformInfo"]["platformUserHandle"], font=myFont8, fill = (255, 255, 255))
     
-    for data in data["data"]["segments"][1:9]:
-        im2 = Image.open(r"icons\{}.webp".format(get_rank(data))).convert("RGBA") #gets icon
-        im2 = im2.resize((100,100))
-        im.paste(im2, (10, count), mask = im2) #adds icon
-        I1.text((120, count+30), get_playlist(data), font=myFont, fill = (255, 255, 255),) #adds text
-        I1.text((120, count+40), str(get_mmr(data)), font=myFont2, fill = (139, 128, 0),)
-        I1.text((120, count+57), get_rank(data) + " " + get_division(data), font=myFont3, fill = (255, 255, 255),)
-        count+=110 #moves down
+    for data in data["data"]["segments"][1:11]:
+        rank = get_rank(data)
+        division = get_division(data)
+        if rank_num_with_division(rank, division) == highest_rank and first == 1: #checks if its the highest rank
+            im2 = Image.open(r"icons\{}.webp".format(rank)).convert("RGBA") #gets icon
+            im2 = im2.resize((240,240), PIL.Image.LANCZOS)
+            im.paste(im2, (300, 80), mask = im2) #adds icon
+            I1.text((520, 140), "Highest Rank:", font=myFont3, fill = (255, 255, 255)) #adds text
+            I1.text((520, 155), get_playlist(data), font=myFont6, fill = (255, 255, 255))
+            I1.text((520, 180), str(get_mmr(data)), font=myFont5, fill = (213, 182, 10))
+            I1.text((520, 220), rank + " " + division, font=myFont, fill = (255, 255, 255))
+            first = 0
+        else:
+            down_count, across_count = get_location(count) #changes location based on iteration
+
+            im2 = Image.open(r"icons\{}.webp".format(rank)).convert("RGBA") #gets icon
+            im2 = im2.resize((100,100), PIL.Image.LANCZOS)
+            im.paste(im2, (across_count, down_count), mask = im2) #adds icon
+            I1.text((across_count+100, down_count+25), get_playlist(data), font=myFont, fill = (255, 255, 255)) #adds text
+            I1.text((across_count+100, down_count+42), str(get_mmr(data)), font=myFont2, fill = (213, 182, 10))
+            I1.text((across_count+100, down_count+67), rank + " " + division, font=myFont3, fill = (255, 255, 255))
+            count+=1
 
     im.show() #shows the image (optional)
     return im
 
 def get_info(platform, ID):
-    # data = get_api(platform=platform, ID=ID)
+    #data = get_api(platform=platform, ID=ID)
     data = getjson()
     
     # error handling
