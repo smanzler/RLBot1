@@ -1328,26 +1328,26 @@ def getjson():
 # playlistCount gets iterated by 1 then condition is >= 1 so it ignores lifetime
 # condition for 1 is for unranked
 # anything else is ranked playlists
-playlistCount = 0
-dict = getjson()
-for data in dict["data"]["segments"]:
-  print(json.dumps(data))
+# playlistCount = 0
+# dict = getjson()
+# for data in dict["data"]["segments"]:
+#   print(json.dumps(data))
 
-  if playlistCount == 1:
-    playlistName = data["metadata"]["name"]  # Gives playlist name -> Unranked
-    unrankedMMR = data["stats"]["rating"]["value"]
-    print(playlistName)
-    print(unrankedMMR)
+#   if playlistCount == 1:
+#     playlistName = data["metadata"]["name"]  # Gives playlist name -> Unranked
+#     unrankedMMR = data["stats"]["rating"]["value"]
+#     print(playlistName)
+#     print(unrankedMMR)
 
-  elif playlistCount > 1:
-    playlistName = data["metadata"]["name"]  # Gives playlist name -> All other playlists
-    rankName = data["stats"]["tier"]["metadata"]["name"]  # Gives rank name
-    divisionName = data["stats"]["division"]["metadata"]["name"]
-    MMR = data["stats"]["rating"]["value"]
-    print(playlistName)
-    print(rankName)
-    print(divisionName)
-    print(MMR)
+#   elif playlistCount > 1:
+#     playlistName = data["metadata"]["name"]  # Gives playlist name -> All other playlists
+#     rankName = data["stats"]["tier"]["metadata"]["name"]  # Gives rank name
+#     divisionName = data["stats"]["division"]["metadata"]["name"]
+#     MMR = data["stats"]["rating"]["value"]
+#     print(playlistName)
+#     print(rankName)
+#     print(divisionName)
+#     print(MMR)
 
-  playlistCount += 1
+#   playlistCount += 1
 

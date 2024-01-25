@@ -143,6 +143,37 @@ def get_location(ID):
         return 500, 10
     else:
         return 0,0
+    
+def make_background():
+    return Image.new(mode="RGB", size=(960, 540),color=(58,59,60))
+
+def get_stats_location(ID):
+    if ID == 0:
+        return 100, 0, "ls"
+    elif ID == 1:
+        return 250, 0, "ls"
+    elif ID == 2:
+        return 400, 0, "ls"
+    elif ID == 3:
+        return 100, 450, "ms"
+    elif ID == 4:
+        return 250, 450, "ms"
+    elif ID == 5:
+        return 400, 450, "ms"
+    elif ID == 6:
+        return 100, 900, "rs"
+    elif ID == 7:
+        return 250, 900, "rs"
+    elif ID == 8:
+        return 400, 900, "rs"
+    else:
+        return 400, 10, "ls"
+    
+def percentageCheck(val):
+    if val >= 50:
+        return "Top " + str(round(100-val, 1))
+    else:
+        return "Bottom " + str(round(val, 1))
 
 def get_pic(platform, ID):
     #data = get_api(platform=platform, ID=ID)
@@ -168,7 +199,7 @@ def get_pic(platform, ID):
     first = 1
 
     I1.text((30, 30), (data["data"]["platformInfo"]["platformSlug"]).capitalize(), font=myFont, fill = (255, 255, 255)) #adds text
-    I1.text((30, 50), data["data"]["platformInfo"]["platformUserHandle"], font=myFont8, fill = (255, 255, 255))
+    I1.text((30, 45), data["data"]["platformInfo"]["platformUserHandle"], font=myFont8, fill = (255, 255, 255))
     
     for data in data["data"]["segments"][1:11]:
         rank = get_rank(data)
@@ -196,6 +227,53 @@ def get_pic(platform, ID):
     im.show() #shows the image (optional)
     return im
 
+def get_stats_pic(platform, ID):
+    #data = get_api(platform=platform, ID=ID)
+    data = getjson()
+    platform = data["data"]["platformInfo"]["platformSlug"]
+    ID = data["data"]["platformInfo"]["platformUserHandle"]
+    season = data["data"]["availableSegments"][-1]["metadata"]["name"]
+
+    data = data["data"]["segments"][0]["stats"]
+    
+    im = make_background() #creates the base
+    
+    I1 = ImageDraw.Draw(im)
+    
+    myFont = ImageFont.truetype('Roboto-Black.ttf', 19) #different font sizes
+    myFont2 = ImageFont.truetype('Roboto-Black.ttf', 25)
+    myFont3 = ImageFont.truetype('Roboto-Black.ttf', 15)
+    
+    myFont8 = ImageFont.truetype('Roboto-Black.ttf', 50)
+    
+    I1.text((30, 30), platform.capitalize(), font=myFont, fill = (255, 255, 255)) #adds text
+    I1.text((30, 45), ID, font=myFont8, fill = (255, 255, 255))
+    
+    count = 0
+    for each in data:
+        if each == "seasonRewardLevel":
+            I1.text((840, 30), season, font=myFont, anchor="ra", fill = (255, 255, 255))
+            I1.text((840, 50), "Reward Level", font=myFont2, anchor="ra", fill = (255, 255, 255))
+            im2 = Image.open(r"icons\{}.webp".format(data[each]["metadata"]["rankName"])).convert("RGBA") #gets icon
+            im2 = im2.resize((100,100), PIL.Image.LANCZOS)
+            im.paste(im2, (850, 15), mask = im2)
+        elif each == "seasonRewardWins":
+            print(percentageCheck(data['seasonRewardLevel']['percentile']))
+            I1.text((840, 78), f"{percentageCheck(data['seasonRewardLevel']['percentile'])}% - {data[each]['value']} Wins", font=myFont3, anchor="ra", fill = (213, 182, 10))
+        else:
+            down_count, across_count, alignVal = get_stats_location(count)
+            I1.text((across_count+30, down_count+30), data[each]["displayName"], font=myFont3, anchor=alignVal, fill = (255, 255, 255))
+            I1.text((across_count+30, down_count+75), str(data[each]["displayValue"]), font=myFont8, anchor=alignVal, fill = (255, 255, 255))
+            I1.text((across_count+30, down_count+100), f"{percentageCheck(data[each]['percentile'])}% - #{data[each]['rank']}", font=myFont3, anchor=alignVal, fill = (213, 182, 10))
+            print(each)
+            count+=1
+        
+    
+
+    #im.show() #shows the image (optional)
+    return im
+
+
 def get_info(platform, ID):
     #data = get_api(platform=platform, ID=ID)
     data = getjson()
@@ -211,6 +289,9 @@ def get_info(platform, ID):
         playlistData +="{}: ({}) {} {}\n".format(get_playlist(data), get_mmr(data), get_rank(data), get_division(data))
     return playlistData.format()
 
+def get_stats_info():
+    return ""
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -220,6 +301,7 @@ async def on_message(message):
     if message.author == client.user:
         return
     msg = message.content
+    
     if msg.startswith('-rank'):
         words = msg.split()
         platform = words[1].lower()
@@ -228,15 +310,26 @@ async def on_message(message):
         if platform == "playstation":
             platform = "psn"
         # steam == Steam      just so i know the keyword for them
-        # epic == Epicf
+        # epic == Epic
         ID = words[2]
         playlistData = get_info(platform, ID)
         print(playlistData)
+        
         #await message.channel.send(playlistData)  #this line sends message back to channel in discord
-        # this block sends the pic (not sure how it works)
-        with BytesIO() as image_binary:
+        
+        with BytesIO() as image_binary:# this block sends the pic (not sure how it works)
             get_pic(platform, ID).save(image_binary, 'PNG')
             image_binary.seek(0)
             await message.channel.send(file=discord.File(fp=image_binary, filename='image.png'))
+    if msg.startswith('-stats'):
+        words = msg.split()
+        platform = words[1].lower()
+        if platform == "xbox":
+            platform = "xbl"
+        if platform == "playstation":
+            platform = "psn"
+        ID = words[2]
+        
+        playlistData = get_stats_info(platform, ID)
 
 client.run('ODQ2Nzk2NjA1NDEwOTAyMDY3.YK0uyw.nwUPfqchJNkuAJgdHZjef_9eItA')
