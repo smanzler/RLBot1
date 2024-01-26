@@ -228,8 +228,8 @@ def get_pic(platform, ID):
     return im
 
 def get_stats_pic(platform, ID):
-    #data = get_api(platform=platform, ID=ID)
-    data = getjson()
+    data = get_api(platform=platform, ID=ID)
+    #data = getjson()
     platform = data["data"]["platformInfo"]["platformSlug"]
     ID = data["data"]["platformInfo"]["platformUserHandle"]
     season = data["data"]["availableSegments"][-1]["metadata"]["name"]
@@ -329,7 +329,10 @@ async def on_message(message):
         if platform == "playstation":
             platform = "psn"
         ID = words[2]
-        
-        playlistData = get_stats_info(platform, ID)
+
+        with BytesIO() as image_binary:# this block sends the pic (not sure how it works)
+            get_stats_pic(platform, ID).save(image_binary, 'PNG')
+            image_binary.seek(0)
+            await message.channel.send(file=discord.File(fp=image_binary, filename='image.png'))
 
 client.run('ODQ2Nzk2NjA1NDEwOTAyMDY3.YK0uyw.nwUPfqchJNkuAJgdHZjef_9eItA')
