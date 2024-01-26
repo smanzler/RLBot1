@@ -145,8 +145,8 @@ def get_location(ID):
         return 0,0
 
 def get_pic(platform, ID):
-    #data = get_api(platform=platform, ID=ID)
-    data = getjson()
+    data = get_api(platform=platform, ID=ID)
+    #data = getjson()
     im = Image.new(mode="RGB", size=(960, 540),color=(58,59,60)) #creates the base
 
     I1 = ImageDraw.Draw(im) # allows text to be added
@@ -175,8 +175,8 @@ def get_pic(platform, ID):
         division = get_division(data)
         if rank_num_with_division(rank, division) == highest_rank and first == 1: #checks if its the highest rank
             im2 = Image.open(r"icons\{}.webp".format(rank)).convert("RGBA") #gets icon
-            im2 = im2.resize((240,240), PIL.Image.LANCZOS)
-            im.paste(im2, (300, 80), mask = im2) #adds icon
+            im2 = im2.resize((200,200), PIL.Image.LANCZOS)
+            im.paste(im2, (320, 100), mask = im2) #adds icon
             I1.text((520, 140), "Highest Rank:", font=myFont3, fill = (255, 255, 255)) #adds text
             I1.text((520, 155), get_playlist(data), font=myFont6, fill = (255, 255, 255))
             I1.text((520, 180), str(get_mmr(data)), font=myFont5, fill = (213, 182, 10))
@@ -193,12 +193,12 @@ def get_pic(platform, ID):
             I1.text((across_count+100, down_count+67), rank + " " + division, font=myFont3, fill = (255, 255, 255))
             count+=1
 
-    im.show() #shows the image (optional)
+    #im.show() #shows the image (optional)
     return im
 
 def get_info(platform, ID):
-    #data = get_api(platform=platform, ID=ID)
-    data = getjson()
+    data = get_api(platform=platform, ID=ID)
+    #data = getjson()
     
     # error handling
     if list(data.keys())[0] == "errors":
