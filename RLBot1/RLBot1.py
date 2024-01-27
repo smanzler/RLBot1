@@ -111,6 +111,8 @@ def rank_num_with_division(rank, division):
         return new_rank_num+2
     elif division == "Division III":
         return new_rank_num+3
+    elif division == "Division IV":
+        return new_rank_num+4
     else:
         return new_rank_num
     
@@ -170,7 +172,9 @@ def get_stats_location(ID):
         return 400, 10, "ls"
     
 def percentageCheck(val):
-    if val >= 50:
+    if val == None:
+        return "Bottom 0"
+    elif val >= 50:
         return "Top " + str(round(100-val, 1))
     else:
         return "Bottom " + str(round(val, 1))
@@ -235,7 +239,7 @@ def get_stats_pic(platform, ID):
     season = data["data"]["availableSegments"][-1]["metadata"]["name"]
 
     data = data["data"]["segments"][0]["stats"]
-    
+    print(data)
     im = make_background() #creates the base
     
     I1 = ImageDraw.Draw(im)
